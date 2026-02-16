@@ -1,75 +1,131 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
-import AppConfigurator from './AppConfigurator.vue';
-import { ref } from 'vue';
+import { useAuth } from '@/composables/useAuth';
 import { useRouter } from 'vue-router';
-import ApplicationLogo from '@/components/Logo/ApplicationLogo.vue';
-import { Button } from 'primevue';
+import { ref } from 'vue';
+import { getInitials } from '@/helpers/general_helper';
 
 const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
-const menu = ref(null);
+const { user } = useAuth();
 const router = useRouter();
+const showNotif = ref(false);
 
-const overlayMenuItems = [
-    {
-        label: 'Profile',
-        icon: 'pi pi-user',
-        command: () => {
-            router.push({ name: 'user.profile' });
-        }
-    },
-    {
-        separator: true
-    },
-    {
-        label: 'Logout',
-        icon: 'pi pi-sign-out',
-        command: () => {
-            localStorage.clear(); // Contoh untuk logout, hapus token atau data
-            sessionStorage.clear();
-            router.push('/auth/login'); // Redirect ke halaman login
-        }
-    }
-];
-function toggleMenu(event) {
-    menu.value.toggle(event);
+function goProfile() {
+    router.push({ name: 'user.profile' });
 }
 </script>
 
 <template>
-    <div class="layout-topbar">
-        <div class="layout-topbar-logo-container">
-            <button class="layout-menu-button layout-topbar-action" @click="onMenuToggle">
-                <i class="pi pi-bars"></i>
-            </button>
-            <!-- <router-link to="/" class="layout-topbar-logo">
-                <ApplicationLogo />
-                <span class="font-bold">Eagleshift</span>
-            </router-link> -->
+    <header class="mobile-topbar">
+        <!-- Left: Hamburger -->
+        <button class="topbar-btn" @click="onMenuToggle" aria-label="Menu">
+            <i class="pi pi-bars"></i>
+        </button>
+
+        <!-- Center: Title/Logo -->
+        <div class="topbar-center">
+            <span class="topbar-brand">Smart<strong>LV</strong></span>
         </div>
 
-        <div class="layout-topbar-actions">
-            <div class="layout-topbar-menu hidden lg:block">
-                <div class="layout-topbar-menu-content">
-                    <Menu ref="menu" :model="overlayMenuItems" :popup="true" class="mt-5" />
-                </div>
-            </div>
-            <Button
-                v-if="$pwa.canInstall"
-                @click="$pwa.install()"
-                class="flex items-center bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 hover:from-emerald-600 hover:to-teal-700 active:scale-95 transition-all duration-200 text-sm"
-            >
-                <i class="pi pi-download"></i>
-                <span class="hidden lg:block">Install</span>
-            </Button>
-            <button type="button" class="layout-topbar-action">
+        <!-- Right: Actions -->
+        <div class="topbar-right">
+            <button class="topbar-btn topbar-btn-notif" @click="showNotif = !showNotif" aria-label="Notifikasi">
                 <i class="pi pi-bell"></i>
-                <span>Messages</span>
+                <span class="notif-badge">3</span>
             </button>
-            <button type="button" class="layout-topbar-action" @click="toggleMenu">
-                <i class="pi pi-user"></i>
-                <span>Profile</span>
+            <button class="topbar-avatar" @click="goProfile" aria-label="Profil">
+                <span class="avatar-initial">{{ getInitials(user.name) }}</span>
             </button>
         </div>
-    </div>
+    </header>
 </template>
+
+<style scoped>
+.mobile-topbar {
+    flex-shrink: 0;
+    height: 3.5rem;
+    z-index: 997;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.75rem;
+    background: var(--surface-card);
+    border-bottom: 1px solid var(--surface-border);
+    padding-top: env(safe-area-inset-top, 0);
+}
+
+.topbar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+}
+.topbar-btn:active {
+    background: var(--surface-hover);
+}
+
+.topbar-center {
+    flex: 1;
+    text-align: center;
+}
+.topbar-brand {
+    font-size: 1.05rem;
+    color: var(--text-color);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+}
+.topbar-brand strong {
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.topbar-btn-notif {
+    position: relative;
+}
+.notif-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.topbar-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 2px solid var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), #047857);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+</style>

@@ -12,30 +12,25 @@ import '@/assets/tailwind.css';
 import { createPinia } from 'pinia';
 import { initializeAuthStore } from './stores/authStore';
 import authDirective from './directives/authDirective';
-import pwaInstall from './plugins/pwa-install';
+import pwaInstall from './plugins/install_pwa';
 
-
-async function clearService(){
-  if ('serviceWorker' in navigator) {
+async function clearService() {
+    if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         for (let registration of registrations) {
             await registration.unregister();
-            console.log('✅ Service worker unregistered:', registration);
         }
     }
-
-    // 🔹 Bersihkan cache lama
     if ('caches' in window) {
         const names = await caches.keys();
         for (let name of names) {
             await caches.delete(name);
-            console.log('🗑️ Cache deleted:', name);
         }
     }
 }
+
 async function init() {
-    // 🔹 Bersihkan service worker lama
-    await clearService()
+    await clearService();
 
     const app = createApp(App);
     const pinia = createPinia();
@@ -47,15 +42,15 @@ async function init() {
             preset: Aura,
             options: {
                 menuMode: 'overlay',
-                darkModeSelector: '.app-dark'
-            }
-        }
+                darkModeSelector: '.app-dark',
+            },
+        },
     });
     app.use(ToastService);
     app.use(pinia);
     app.use(authDirective);
     app.use(ConfirmationService);
-     app.use(pwaInstall)
+    app.use(pwaInstall);
 
     const isAuthenticated = await initializeAuthStore();
     if (isAuthenticated) {
@@ -67,5 +62,4 @@ async function init() {
     app.mount('#app');
 }
 
-// mulai bootstrap
 init();

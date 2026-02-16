@@ -2,52 +2,73 @@ html {
     height: 100%;
     font-size: 14px;
     line-height: 1.2;
+    -webkit-text-size-adjust: 100%;
 }
 
 body {
     font-family: 'Poppins', sans-serif;
     color: var(--text-color);
-    background-color: var(--surface-ground);
     margin: 0;
     padding: 0;
     min-height: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    /* Desktop: neutral bg behind the phone frame */
+    background-color: #e8ecf1;
+}
 
-    
+body.blocked-scroll .layout-scroll-area {
+    overflow: hidden !important;
 }
 
 a {
     text-decoration: none;
 }
 
+* {
+    touch-action: manipulation;
+}
+
+*:focus {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* =============================================
+   PHONE FRAME — flex column, max 480px centered
+   ============================================= */
 .layout-wrapper {
-    min-height: 100vh;
-    
-    // Custom Scrollbar
-    &::-webkit-scrollbar {
-        width: 6px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--surface-ground);
+    box-shadow: 0 0 0 1px var(--surface-border, #e2e8f0);
+}
+
+/* Desktop: phone-frame shadow */
+@media (min-width: 481px) {
+    .layout-wrapper {
+        box-shadow:
+            0 0 0 1px rgba(0, 0, 0, 0.06),
+            0 8px 40px rgba(0, 0, 0, 0.1),
+            0 2px 12px rgba(0, 0, 0, 0.04);
     }
+}
 
-    &::-webkit-scrollbar-track {
-        background: transparent;
-        margin: 0.5rem 0;
+/* On actual mobile: no shadow, full bg */
+@media (max-width: 480px) {
+    body {
+        background-color: var(--surface-ground);
     }
-
-    &::-webkit-scrollbar-thumb {
-        background: var(--surface-border);
-        border-radius: 10px;
-        transition: all 0.3s ease;
-
-        &:hover {
-            background: var(--surface-border);
-        }
+    .layout-wrapper {
+        box-shadow: none;
+        max-width: 100%;
     }
-
-    // Firefox
-    scrollbar-width: thin;
-    scrollbar-color: var(--surface-border) transparent;
-
-    // Smooth Scrolling
-    scroll-behavior: smooth;
 }

@@ -5,17 +5,18 @@ const layoutConfig = reactive({
     primary: 'emerald',
     surface: null,
     darkTheme: false,
-    menuMode: 'static'
+    menuMode: 'overlay', // Always overlay on mobile
 });
 
 const layoutState = reactive({
+    sidebarVisible: false,
+    profileSidebarVisible: false,
+    activeMenuItem: null,
+    // Keep these for backward compat with AppMenuItem
     staticMenuDesktopInactive: false,
     overlayMenuActive: false,
-    profileSidebarVisible: false,
-    configSidebarVisible: false,
     staticMenuMobileActive: false,
     menuHoverActive: false,
-    activeMenuItem: null
 });
 
 export function useLayout() {
@@ -42,11 +43,9 @@ export function useLayout() {
     const toggleDarkMode = () => {
         if (!document.startViewTransition) {
             executeDarkModeToggle();
-
             return;
         }
-
-        document.startViewTransition(() => executeDarkModeToggle(event));
+        document.startViewTransition(() => executeDarkModeToggle());
     };
 
     const executeDarkModeToggle = () => {
@@ -54,31 +53,52 @@ export function useLayout() {
         document.documentElement.classList.toggle('app-dark');
     };
 
+    // Mobile: toggle sidebar overlay
     const onMenuToggle = () => {
-        if (layoutConfig.menuMode === 'overlay') {
-            layoutState.overlayMenuActive = !layoutState.overlayMenuActive;
-        }
+        layoutState.sidebarVisible = !layoutState.sidebarVisible;
+        layoutState.staticMenuMobileActive = layoutState.sidebarVisible;
+        layoutState.overlayMenuActive = layoutState.sidebarVisible;
 
-        if (window.innerWidth > 991) {
-            layoutState.staticMenuDesktopInactive = !layoutState.staticMenuDesktopInactive;
+        // Block scroll on the scroll area
+        if (layoutState.sidebarVisible) {
+            document.body.classList.add('blocked-scroll');
         } else {
-            layoutState.staticMenuMobileActive = !layoutState.staticMenuMobileActive;
+            document.body.classList.remove('blocked-scroll');
         }
+    };
+
+    const closeSidebar = () => {
+        layoutState.sidebarVisible = false;
+        layoutState.staticMenuMobileActive = false;
+        layoutState.overlayMenuActive = false;
+        document.body.classList.remove('blocked-scroll');
     };
 
     const resetMenu = () => {
-        layoutState.overlayMenuActive = false;
-        layoutState.staticMenuMobileActive = false;
+        closeSidebar();
         layoutState.menuHoverActive = false;
     };
 
-    const isSidebarActive = computed(() => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive);
-
+    const isSidebarActive = computed(() => layoutState.sidebarVisible);
     const isDarkTheme = computed(() => layoutConfig.darkTheme);
-
     const getPrimary = computed(() => layoutConfig.primary);
-
     const getSurface = computed(() => layoutConfig.surface);
 
-    return { layoutConfig: readonly(layoutConfig), layoutState: readonly(layoutState), onMenuToggle, isSidebarActive, isDarkTheme, getPrimary, getSurface, setActiveMenuItem, toggleDarkMode, setPrimary, setSurface, setPreset, resetMenu, setMenuMode };
+    return {
+        layoutConfig: readonly(layoutConfig),
+        layoutState: readonly(layoutState),
+        onMenuToggle,
+        closeSidebar,
+        isSidebarActive,
+        isDarkTheme,
+        getPrimary,
+        getSurface,
+        setActiveMenuItem,
+        toggleDarkMode,
+        setPrimary,
+        setSurface,
+        setPreset,
+        resetMenu,
+        setMenuMode,
+    };
 }

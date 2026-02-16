@@ -1,14 +1,13 @@
+/* Scrollable content area between topbar and bottom nav */
 .layout-main-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    justify-content: space-between;
-    padding: 5rem 1rem 1rem 1rem;
-    transition: margin-left var(--layout-section-transition-duration);
-
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem;
+    scroll-behavior: smooth;
 }
 
 .layout-main {
     flex: 1 1 auto;
-    padding-bottom: 1rem;
 }
